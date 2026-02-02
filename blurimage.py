@@ -38,7 +38,8 @@ def main() -> None:
     args = parser.parse_args()
 
     image_path = args.image
-    output_path = str(Path(image_path).with_suffix("")) + "_blurred" + Path(image_path).suffix
+    p = Path(image_path)
+    output_path = str(p.with_name(p.stem.removesuffix(".local") + "_blurred" + p.suffix))
 
     # Lade das Bild
     img = cv2.imread(image_path)
@@ -52,7 +53,7 @@ def main() -> None:
     # Regex für die Zielwörter:
     # Findet "vroomfondel" (case insensitive)
     # ODER Wörter, die auf .png, .jpg, .mp4 enden
-    pattern = re.compile(rf"({re.escape(args.username)}|.*\.png$|.*\.jpg$|.*\.mp4$|.*\.mp4\.json$)", re.IGNORECASE)
+    pattern = re.compile(rf"({re.escape(args.username)}|PXL.*|.*\.png$|.*\.jpg$|.*\.mp4$|.*\.json$)", re.IGNORECASE)
 
     n_boxes = len(d["text"])
     for i in range(n_boxes):
