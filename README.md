@@ -4,6 +4,7 @@
 [![mypy and pytests](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/actions/workflows/mypynpytests.yml/badge.svg)](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/actions/workflows/mypynpytests.yml)
 ![Cumulative Clones](https://img.shields.io/endpoint?logo=github&url=https://gist.githubusercontent.com/vroomfondel/ba86ae83a5d1cfffce03ce36d30fa02d/raw/flickr-immich-k8s-sync-operator_somestuff_clone_count.json)
 [![Docker Pulls](https://img.shields.io/docker/pulls/xomoxcc/flickr-immich-k8s-sync-operator?logo=docker)](https://hub.docker.com/r/xomoxcc/flickr-immich-k8s-sync-operator/tags)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/flickr-immich-k8s-sync-operator?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=PyPi+Downloads)](https://pepy.tech/projects/flickr-immich-k8s-sync-operator)
 
 Kubernetes operator that watches per-user Flickr download Jobs in a namespace,
 restarts failed Jobs after a configurable delay, and retrieves pod logs and exit
@@ -23,10 +24,19 @@ The project scaffolding (packaging, Docker image, CI) is in place.
 - On failure (after a configurable delay), **deletes** the Job with `Foreground` propagation policy and **recreates** it from a cached manifest
 - Logs pod exit codes and tail logs before every restart
 
+### How it works
+
+1. An Ansible playbook ([`kubectlstuff_flickr_downloader.yml`](https://github.com/vroomfondel/somestuff/blob/main/flickrdownloaderstuff/kubectlstuff_flickr_downloader.yml)) creates per-user Flickr download Jobs in the `flickr-downloader` namespace
+2. Each Job runs [`flickr_download`](https://github.com/beaufour/flickr-download) with `BACKOFF_EXIT_ON_429=true`, so it exits immediately on HTTP 429 rate-limit errors instead of sleeping
+3. Jobs mount host directories for config, backup, and cache per user
+4. This operator watches all configured Jobs for failure conditions
+5. When a Job fails, the operator logs pod exit codes and tail logs, waits `RESTART_DELAY` seconds (default 1 hour), then deletes and recreates the Job from a cached manifest
+6. The operator uses namespace-scoped RBAC with minimal permissions (Jobs, Pods, Pod logs)
+
 ## Prerequisites
 
 - A running Kubernetes cluster
-- Flickr download Jobs already deployed — the operator manages their lifecycle (restart on failure), not initial creation
+- Per-user Flickr download Jobs already deployed (e.g. via the Ansible playbook above) — the operator manages their lifecycle (restart on failure), not initial creation
 - An [Immich](https://immich.app/) instance (for planned sync functionality)
 
 ## Configuration
@@ -104,7 +114,7 @@ spec:
       serviceAccountName: flickr-operator
       containers:
         - name: operator
-          image: flickr-immich-k8s-sync-operator:latest
+          image: xomoxcc/flickr-immich-k8s-sync-operator:latest
           env:
             - name: JOB_NAMES
               value: "flickr-downloader-alice,flickr-downloader-bob"
