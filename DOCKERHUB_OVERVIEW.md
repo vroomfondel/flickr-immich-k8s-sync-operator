@@ -1,6 +1,7 @@
 [![black-lint](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/actions/workflows/checkblack.yml/badge.svg)](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/actions/workflows/checkblack.yml)
 [![mypy and pytests](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/actions/workflows/mypynpytests.yml/badge.svg)](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/actions/workflows/mypynpytests.yml)
 ![Cumulative Clones](https://img.shields.io/endpoint?logo=github&url=https://gist.githubusercontent.com/vroomfondel/ba86ae83a5d1cfffce03ce36d30fa02d/raw/flickr-immich-k8s-sync-operator_somestuff_clone_count.json)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/flickr-immich-k8s-sync-operator?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=PyPi+Downloads)](https://pepy.tech/projects/flickr-immich-k8s-sync-operator)
 
 [![Gemini_Generated_Image_gwjk7ggwjk7ggwjk_250x250.png](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/raw/main/Gemini_Generated_Image_gwjk7ggwjk7ggwjk_250x250.png)](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator)
 
