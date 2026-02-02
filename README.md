@@ -13,6 +13,12 @@ restarts failed Jobs after a configurable delay, and retrieves pod logs and exit
 codes for failed Jobs before restarting them. Designed to run alongside
 [Immich](https://immich.app/) (self-hosted photo management).
 
+### Operator in Action
+
+![Operator log output](Bildschirmfoto_2026-02-02_18-43-40_blurred.png)
+
+*The operator monitoring Flickr download Jobs in [k9s](https://k9scli.io/), detecting failures, and scheduling restarts.*
+
 ## Status
 
 **Beta (v0.0.1)** — the core job-restart loop is implemented and functional.
