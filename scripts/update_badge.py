@@ -30,7 +30,9 @@ def main() -> None:
     gist_token = os.environ["GIST_TOKEN"]
     gist_id = os.environ.get("GIST_ID", "ba86ae83a5d1cfffce03ce36d30fa02d")
     repo_token = os.environ["REPO_TOKEN"]
-    repo_name = os.environ.get("GITHUB_REPOSITORY", "vroomfondel/flickr-immich-k8s-sync-operator")  # needs full repo-name with username e.g. vroomfondel/somestuff
+    repo_name = os.environ.get(
+        "GITHUB_REPOSITORY", "vroomfondel/flickr-immich-k8s-sync-operator"
+    )  # needs full repo-name with username e.g. vroomfondel/somestuff
 
     history_filename = "flickr-immich-k8s-sync-operator_clone_history.json"
     badge_filename = "flickr-immich-k8s-sync-operator_somestuff_clone_count.json"
