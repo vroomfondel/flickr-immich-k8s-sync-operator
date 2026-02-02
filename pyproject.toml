@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = ["flickr_immich_k8s_sync_operator"]
+
+[project]
+name = "flickr-immich-k8s-sync-operator"
+dynamic = ["version"]
+authors = [
+  { name="Henning Thieß", email="ht@xomox.cc" },
+]
+description = "Operator for syncing photos from Flickr to Immich on Kubernetes"
+readme = "README.md"
+requires-python = ">=3.14"
+license-files = ["LICENSE.md"]
+
+keywords = ["flickr", "immich", "sync", "kubernetes", "k8s", "operator", "photo-management", "self-hosted"]
+
+# https://pypi.org/classifiers/
+classifiers = [
+    "Development Status :: 4 - Beta",
+
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: System :: Archiving",
+
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    'kubernetes>=28.1.0',
+    'loguru>=0.7.3',
+]
+
+[project.scripts]
+flickr-immich-k8s-sync-operator = "flickr_immich_k8s_sync_operator.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/vroomfondel/flickr-immich-k8s-sync-operator"
+Repository = "https://github.com/vroomfondel/flickr-immich-k8s-sync-operator"
+Issues = "https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/issues"
+
+[tool.hatch.version]
+path = "flickr_immich_k8s_sync_operator/__init__.py"
+
+[tool.isort]
+profile = "black"
+line_length = 120
