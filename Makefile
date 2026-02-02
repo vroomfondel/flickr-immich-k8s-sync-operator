@@ -1,4 +1,4 @@
-.PHONY: tests help install venv lint isort tcheck build commit-checks prepare pypibuild pypipush docker
+.PHONY: tests help install venv lint isort tcheck build commit-checks prepare pypibuild pypipush docker update-all-dockerhub-readmes
 SHELL := /usr/bin/bash
 .ONESHELL:
 
@@ -14,6 +14,7 @@ help:
 	@printf "\npypibuild\n\tbuild package for pypi\n"
 	@printf "\npypipush\n\tpush package to pypi\n"
 	@printf "\ndocker\n\tbuild docker image\n"
+	@printf "\nupdate-all-dockerhub-readmes \n\tupdate Docker Hub repo description from DOCKERHUB_OVERVIEW.md\n"
 
 
 # check for "CI" not in os.environ || "GITHUB_RUN_ID" not in os.environ
@@ -87,3 +88,28 @@ DOCKER_IMAGE := flickr-immich-k8s-sync-operator
 docker: venv
 	@$(venv_activated)
 	docker build -t $(DOCKER_IMAGE):$(VERSION) -t $(DOCKER_IMAGE):latest .
+
+update-all-dockerhub-readmes:
+	@AUTH=$$(jq -r '.auths["https://index.docker.io/v1/"].auth' ~/.docker/config.json | base64 -d) && \
+	USERNAME=$$(echo "$$AUTH" | cut -d: -f1) && \
+	PASSWORD=$$(echo "$$AUTH" | cut -d: -f2-) && \
+	TOKEN=$$(curl -s -X POST https://hub.docker.com/v2/users/login/ \
+	  -H "Content-Type: application/json" \
+	  -d '{"username":"'"$$USERNAME"'","password":"'"$$PASSWORD"'"}' \
+	  | jq -r .token) && \
+	for mapping in \
+	  ".:xomoxcc/flickr-immich-k8s-sync-operator"; do \
+	  DIR=$$(echo "$$mapping" | cut -d: -f1) && \
+	  REPO=$$(echo "$$mapping" | cut -d: -f2) && \
+	  FILE="$$DIR/DOCKERHUB_OVERVIEW.md" && \
+	  if [ -f "$$FILE" ]; then \
+	    echo "Updating $$REPO from $$FILE..." && \
+	    curl -s -X PATCH "https://hub.docker.com/v2/repositories/$$REPO/" \
+	      -H "Authorization: Bearer $$TOKEN" \
+	      -H "Content-Type: application/json" \
+	      -d "{\"full_description\": $$(jq -Rs . "$$FILE")}" \
+	      | jq -r '.full_description | length | "  Updated: \(.) chars"'; \
+	  else \
+	    echo "Skipping $$REPO - $$FILE not found"; \
+	  fi; \
+	done

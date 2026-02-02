@@ -6,6 +6,8 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/xomoxcc/flickr-immich-k8s-sync-operator?logo=docker)](https://hub.docker.com/r/xomoxcc/flickr-immich-k8s-sync-operator/tags)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/flickr-immich-k8s-sync-operator?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=PyPi+Downloads)](https://pepy.tech/projects/flickr-immich-k8s-sync-operator)
 
+[![Gemini_Generated_Image_gwjk7ggwjk7ggwjk_250x250.png](Gemini_Generated_Image_gwjk7ggwjk7ggwjk_250x250.png)](https://hub.docker.com/r/xomoxcc/flickr-immich-k8s-sync-operator/tags)
+
 Kubernetes operator that watches per-user Flickr download Jobs in a namespace,
 restarts failed Jobs after a configurable delay, and retrieves pod logs and exit
 codes for failed Jobs before restarting them. Designed to run alongside
