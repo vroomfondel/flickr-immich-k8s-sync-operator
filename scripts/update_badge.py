@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from pathlib import Path
 from pprint import pprint
 
 
@@ -23,7 +24,24 @@ from github import Auth, Clones, Github, InputFileContent, RateLimitOverview
 from github.Rate import Rate
 
 
+def _load_include_local() -> None:
+    """Load VAR="value" assignments from include.local.sh next to this script."""
+    path = Path(__file__).parent / "include.local.sh"
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        key, _, value = line.partition("=")
+        if not _:
+            continue
+        value = value.strip().strip("\"'")
+        os.environ.setdefault(key.strip(), value)
+
+
 def main() -> None:
+    _load_include_local()
     print("update_badge.py::main()")
 
     # --- KONFIGURATION ---
