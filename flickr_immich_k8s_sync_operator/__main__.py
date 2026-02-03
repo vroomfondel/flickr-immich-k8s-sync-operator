@@ -30,6 +30,7 @@ def main() -> None:
         ["version", __version__],
         ["github", "https://github.com/vroomfondel/flickr-immich-k8s-sync-operator"],
         ["pypi", "https://pypi.org/project/flickr-immich-k8s-sync-operator"],
+        ["Docker Hub", "https://hub.docker.com/r/xomoxcc/flickr-immich-k8s-sync-operator"],
     ]
     table_str = tabulate(startup_rows, tablefmt="mixed_grid")
     lines = table_str.split("\n")

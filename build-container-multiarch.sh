@@ -275,20 +275,24 @@ build_local_only() {
 #=============================================================================
 main() {
   setup_environment
-  ensure_docker_login
 
-  # Handle command line arguments
-  if [[ "${1:-}" == "onlylocal" ]]; then
-    build_local_only
-    exit 0
-  fi
-
-  # Build based on container runtime
-  if (( DOCKER_IS_PODMAN == 1 )); then
-    build_with_podman
-  else
-    build_with_docker
-  fi
+  case "${1:-}" in
+    login)
+      ensure_docker_login
+      ;;
+    onlylocal)
+      ensure_docker_login
+      build_local_only
+      ;;
+    *)
+      ensure_docker_login
+      if (( DOCKER_IS_PODMAN == 1 )); then
+        build_with_podman
+      else
+        build_with_docker
+      fi
+      ;;
+  esac
 }
 
 # Run main and ensure cleanup
