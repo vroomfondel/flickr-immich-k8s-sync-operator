@@ -49,8 +49,12 @@ isort: venv
 
 tcheck: venv
 	@$(venv_activated)
-	mypy flickr_immich_k8s_sync_operator
+	mypy .
 
+gitleaks: venv .git/hooks/pre-commit
+	@$(venv_activated)
+	pre-commit run gitleaks --all-files
+	# gitleaks dir . -v
 
 .git/hooks/pre-commit: venv
 	@$(venv_activated)
