@@ -21,8 +21,9 @@ codes for failed Jobs before restarting them. Designed to run alongside
 
 ## Status
 
-**Beta (v0.0.1)** — the core job-restart loop is implemented and functional.
-The project scaffolding (packaging, Docker image, CI) is in place.
+**Beta (v0.0.4)** — the core job-restart loop is stable and actively deployed.
+OOMKilled-aware restart logic, structured startup/configuration logging, and
+full CI (black + mypy + pytest) are in place.
 
 ## Architecture
 
