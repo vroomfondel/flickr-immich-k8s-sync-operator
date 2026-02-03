@@ -28,6 +28,7 @@ codes for failed Jobs before restarting them. Designed to run alongside
 - Retrieves pod logs and exit codes before restarting
 - Configurable check interval and restart delay
 - Clean signal handling (SIGTERM/SIGINT) for graceful container shutdown
+- OOMKilled-aware restart logic — skips the restart delay when pods are killed by OOM
 - Structured logging via loguru
 
 ## Quick start
@@ -45,6 +46,7 @@ docker run --rm xomoxcc/flickr-immich-k8s-sync-operator:latest
 | `JOB_NAMES` | Comma-separated Job names to monitor (**required**) | -- |
 | `CHECK_INTERVAL` | Seconds between check cycles | `60` |
 | `RESTART_DELAY` | Seconds to wait after failure before restart | `3600` |
+| `SKIP_DELAY_ON_OOM` | Skip restart delay when failure reason is `OOMKilled` | `false` |
 
 ## Kubernetes Deployment
 

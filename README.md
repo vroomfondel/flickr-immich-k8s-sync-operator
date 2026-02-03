@@ -204,6 +204,8 @@ python -m flickr_immich_k8s_sync_operator
 | `make pypibuild`| Build sdist + wheel with hatch               |
 | `make pypipush` | Publish to PyPI with hatch                   |
 | `make docker`   | Build Docker image                           |
+| `make gitleaks` | Run gitleaks secret scanner via pre-commit   |
+| `make update-all-dockerhub-readmes` | Push DOCKERHUB_OVERVIEW.md to Docker Hub repo description |
 
 ## License
 
