@@ -1,6 +1,7 @@
 import signal
 import sys
 import threading
+from dataclasses import fields
 
 from loguru import logger as glogger
 
@@ -28,6 +29,8 @@ def main() -> None:
 
     try:
         cfg = OperatorConfig.from_env()
+        for f in fields(cfg):
+            glogger.info("  {}: {}", f.name, getattr(cfg, f.name))
     except ValueError as exc:
         glogger.error("Configuration error: {}", exc)
         sys.exit(1)
