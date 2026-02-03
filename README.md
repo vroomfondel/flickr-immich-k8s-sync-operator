@@ -56,6 +56,7 @@ The project scaffolding (packaging, Docker image, CI) is in place.
 | `JOB_NAMES` | Comma-separated Job names to monitor (**required**) | — |
 | `CHECK_INTERVAL` | Seconds between check cycles | `60` |
 | `RESTART_DELAY` | Seconds to wait after failure before restart | `3600` |
+| `SKIP_DELAY_ON_OOM` | Skip restart delay when failure reason is `OOMKilled` | `false` |
 
 ## Kubernetes Deployment
 
@@ -134,6 +135,8 @@ spec:
             #   value: "60"                      # default
             # - name: RESTART_DELAY
             #   value: "3600"                    # default
+            # - name: SKIP_DELAY_ON_OOM
+            #   value: "false"                   # default
           resources:
             requests:
               cpu: 50m

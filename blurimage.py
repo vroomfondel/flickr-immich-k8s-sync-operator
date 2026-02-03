@@ -22,12 +22,14 @@ import shutil
 if shutil.which("tesseract") is None:
     raise SystemExit("tesseract is not installed or not in PATH. Install it, e.g.: apt install tesseract-ocr")
 
+import argparse
+import re
+from pathlib import Path
+
 import cv2
 import pytesseract
 from pytesseract import Output
-import re
-import argparse
-from pathlib import Path
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Blur sensitive text in an image using OCR detection.")

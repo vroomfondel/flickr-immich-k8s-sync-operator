@@ -123,9 +123,16 @@ class JobRestartOperator:
         """Log pod details and restart the Job if the restart delay has elapsed."""
         elapsed = (datetime.now(timezone.utc) - failure_time).total_seconds()
 
-        self._log_pod_details(job_name)
+        reasons = self._get_pod_failure_reasons(job_name)
+        skip_delay = self._cfg.skip_delay_on_oom and "OOMKilled" in reasons
 
-        if elapsed >= self._cfg.restart_delay:
+        if skip_delay:
+            self._log.info(
+                "\t{} failed with OOMKilled — skipping restart delay, restarting immediately.",
+                job_name,
+            )
+            self._restart_job(job_name, shutdown_event)
+        elif elapsed >= self._cfg.restart_delay:
             self._log.info(
                 "\t{} failed {:.0f}s ago (>= {}s). Deleting and recreating...",
                 job_name,
@@ -142,8 +149,9 @@ class JobRestartOperator:
                 remaining,
             )
 
-    def _log_pod_details(self, job_name: str) -> None:
-        """List pods for *job_name* and log exit codes + tail logs."""
+    def _get_pod_failure_reasons(self, job_name: str) -> set[str]:
+        """List pods for *job_name*, log exit codes + tail logs, and return termination reasons."""
+        reasons: set[str] = set()
         try:
             pods = self._core_v1.list_namespaced_pod(
                 self._cfg.namespace,
@@ -157,7 +165,8 @@ class JobRestartOperator:
                     if cs.state and cs.state.terminated:
                         exit_code = cs.state.terminated.exit_code
                         reason = cs.state.terminated.reason
-                        break
+                        if reason:
+                            reasons.add(reason)
                 try:
                     tail = self._core_v1.read_namespaced_pod_log(
                         pod_name,
@@ -176,6 +185,7 @@ class JobRestartOperator:
                 )
         except Exception:
             self._log.warning("\tCould not retrieve pod details for {}", job_name)
+        return reasons
 
     def _restart_job(self, job_name: str, shutdown_event: threading.Event) -> None:
         """Delete and recreate a Job from the cached manifest."""

@@ -17,6 +17,7 @@ class OperatorConfig:
     job_names: list[str]
     check_interval: int
     restart_delay: int
+    skip_delay_on_oom: bool
 
     @classmethod
     def from_env(cls) -> OperatorConfig:
@@ -32,6 +33,9 @@ class OperatorConfig:
             Seconds between check cycles (default ``60``).
         RESTART_DELAY : str, optional
             Seconds after failure before a Job is restarted (default ``3600``).
+        SKIP_DELAY_ON_OOM : str, optional
+            If ``"true"`` (case-insensitive), skip the restart delay when the
+            failure reason is ``OOMKilled`` (default ``"false"``).
 
         Raises
         ------
@@ -48,4 +52,5 @@ class OperatorConfig:
             job_names=job_names,
             check_interval=int(os.environ.get("CHECK_INTERVAL", "60")),
             restart_delay=int(os.environ.get("RESTART_DELAY", "3600")),
+            skip_delay_on_oom=os.environ.get("SKIP_DELAY_ON_OOM", "false").strip().lower() == "true",
         )
