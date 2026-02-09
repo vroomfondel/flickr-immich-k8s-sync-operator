@@ -13,6 +13,7 @@ readonly DOCKER_IMAGE="docker.io/xomoxcc/flickr-immich-k8s-sync-operator:python-
 readonly DOCKER_IMAGE_LATEST="${DOCKER_IMAGE%:*}:latest"
 readonly PLATFORMS=("linux/amd64" "linux/arm64")
 readonly DOCKERFILE=Dockerfile
+readonly DOCKER_BUILD_CONTEXT=$(dirname "$(realpath "${DOCKERFILE}")")
 readonly BUILDER_NAME=mbuilder
 readonly ENABLE_PARALLEL_BUILDS=0
 readonly BUILDTIME="$(date +'%Y-%m-%d %H:%M:%S %Z')"
@@ -150,15 +151,17 @@ build_with_docker() {
     "${build_args[@]}" \
     --platform "${platforms_csv}" \
     --push \
-    .
+    "${DOCKER_BUILD_CONTEXT}"
 }
 
 build_with_podman() {
   log "Building with Podman manifest workflow..."
 
-  # Remove existing manifest if it exists
+  # Remove existing manifest/image if it exists
   echo podman manifest rm "${DOCKER_IMAGE}"
   podman manifest rm "${DOCKER_IMAGE}" 2>/dev/null || true
+  echo podman image rm "${DOCKER_IMAGE}"
+  podman image rm "${DOCKER_IMAGE}" 2>/dev/null || true
 
   # Track platform-specific data
   local -a platform_tags=()
@@ -193,12 +196,12 @@ build_with_podman() {
           "${build_args[@]}" \
           --platform "${platform}" \
           -t "${platform_tag}" \
-          . || exit 1
+          "${DOCKER_BUILD_CONTEXT}" || exit 1
       ) &
       build_pids+=($!)
     else
-      echo podman ${connect_arg} build "${build_args[@]}" --platform "${platform}" -t "${platform_tag}" .
-      podman ${connect_arg} build "${build_args[@]}" --platform "${platform}" -t "${platform_tag}" . || exit 1
+      echo podman ${connect_arg} build "${build_args[@]}" --platform "${platform}" -t "${platform_tag}" "${DOCKER_BUILD_CONTEXT}"
+      podman ${connect_arg} build "${build_args[@]}" --platform "${platform}" -t "${platform_tag}" "${DOCKER_BUILD_CONTEXT}" || exit 1
     fi
   done
 
@@ -273,11 +276,11 @@ build_local_only() {
 
   echo docker build \
     "${build_args[@]}" \
-    .
+    "${DOCKER_BUILD_CONTEXT}"
 
   docker build \
     "${build_args[@]}" \
-    .
+    "${DOCKER_BUILD_CONTEXT}"
 }
 
 #=============================================================================
@@ -306,5 +309,5 @@ main() {
 }
 
 # Run main and ensure cleanup
-trap stop_podman_vm_if_started EXIT
+trap 'stop_podman_vm_if_started || true' EXIT
 main "$@"
