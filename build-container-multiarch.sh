@@ -13,7 +13,7 @@ readonly DOCKER_IMAGE="docker.io/xomoxcc/flickr-immich-k8s-sync-operator:python-
 readonly DOCKER_IMAGE_LATEST="${DOCKER_IMAGE%:*}:latest"
 readonly PLATFORMS=("linux/amd64" "linux/arm64")
 readonly DOCKERFILE=Dockerfile
-readonly DOCKER_BUILD_CONTEXT=$(dirname "$(realpath "${DOCKERFILE}")")
+readonly DOCKER_BUILD_CONTEXT=$(dirname "$(realpath --relative-to="${SCRIPT_DIR}" "${SCRIPT_DIR}/${DOCKERFILE}")")
 readonly BUILDER_NAME=mbuilder
 readonly ENABLE_PARALLEL_BUILDS=0
 readonly BUILDTIME="$(date +'%Y-%m-%d %H:%M:%S %Z')"
