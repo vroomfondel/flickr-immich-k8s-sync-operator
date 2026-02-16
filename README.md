@@ -6,18 +6,20 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/xomoxcc/flickr-immich-k8s-sync-operator?logo=docker)](https://hub.docker.com/r/xomoxcc/flickr-immich-k8s-sync-operator/tags)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/flickr-immich-k8s-sync-operator?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=PyPi+Downloads)](https://pepy.tech/projects/flickr-immich-k8s-sync-operator)
 
-[![Gemini_Generated_Image_gwjk7ggwjk7ggwjk_250x250.png](Gemini_Generated_Image_gwjk7ggwjk7ggwjk_250x250.png)](https://hub.docker.com/r/xomoxcc/flickr-immich-k8s-sync-operator)
+[![Gemini_Generated_Image_gwjk7ggwjk7ggwjk_250x250.png](https://raw.githubusercontent.com/vroomfondel/flickr-immich-k8s-sync-operator/main/Gemini_Generated_Image_gwjk7ggwjk7ggwjk_250x250.png)](https://hub.docker.com/r/xomoxcc/flickr-immich-k8s-sync-operator)
 
 Kubernetes operator that watches per-user Flickr download Jobs in a namespace,
 restarts failed Jobs after a configurable delay, and retrieves pod logs and exit
 codes for failed Jobs before restarting them. Designed to run alongside
 [Immich](https://immich.app/) (self-hosted photo management).
 
-### Operator in Action
+## Screenshots
 
-![Operator log output](Bildschirmfoto_2026-02-02_18-43-40_blurred.png)
+![Operator startup with configuration overview](https://raw.githubusercontent.com/vroomfondel/flickr-immich-k8s-sync-operator/main/Bildschirmfoto_2026-02-16_19-51-45_blurred.png)
 
-*The operator monitoring Flickr download Jobs in [k9s](https://k9scli.io/), detecting failures, and scheduling restarts.*
+![Operator monitoring jobs across multiple check cycles](https://raw.githubusercontent.com/vroomfondel/flickr-immich-k8s-sync-operator/main/Bildschirmfoto_2026-02-16_19-52-07_blurred.png)
+
+![Operator detecting failures and scheduling restarts](https://raw.githubusercontent.com/vroomfondel/flickr-immich-k8s-sync-operator/main/Bildschirmfoto_2026-02-02_18-43-40_blurred.png)
 
 ## Status
 

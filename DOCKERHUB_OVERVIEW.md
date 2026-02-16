@@ -12,11 +12,13 @@ restarts failed Jobs after a configurable delay, and retrieves pod logs and exit
 codes for failed Jobs before restarting them. Designed to run alongside
 [Immich](https://immich.app/) (self-hosted photo management).
 
-### Operator in Action
+## Screenshots
 
-![Operator log output](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/raw/main/Bildschirmfoto_2026-02-02_18-43-40_blurred.png)
+![Operator startup with configuration overview](https://raw.githubusercontent.com/vroomfondel/flickr-immich-k8s-sync-operator/main/Bildschirmfoto_2026-02-16_19-51-45_blurred.png)
 
-*The operator monitoring Flickr download Jobs in [k9s](https://k9scli.io/), detecting failures, and scheduling restarts.*
+![Operator monitoring jobs across multiple check cycles](https://raw.githubusercontent.com/vroomfondel/flickr-immich-k8s-sync-operator/main/Bildschirmfoto_2026-02-16_19-52-07_blurred.png)
+
+![Operator detecting failures and scheduling restarts](https://raw.githubusercontent.com/vroomfondel/flickr-immich-k8s-sync-operator/main/Bildschirmfoto_2026-02-02_18-43-40_blurred.png)
 
 - **Source**: [GitHub](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator)
 - **PyPI**: [flickr-immich-k8s-sync-operator](https://pypi.org/project/flickr-immich-k8s-sync-operator/)
