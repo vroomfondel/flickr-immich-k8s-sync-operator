@@ -1,3 +1,5 @@
+"""Package initialisation — version constant and loguru configuration helper."""
+
 __version__ = "0.0.4"
 
 import os
@@ -10,14 +12,31 @@ glogger.disable(__name__)
 
 
 def _loguru_skiplog_filter(record: dict) -> bool:  # type: ignore[type-arg]
-    """Filter function to hide records with ``extra['skiplog']`` set."""
+    """Filter log records that have the ``skiplog`` extra flag set.
+
+    Args:
+        record: A loguru record dictionary.
+
+    Returns:
+        ``False`` when the record should be suppressed, ``True`` otherwise.
+    """
     return not record.get("extra", {}).get("skiplog", False)
 
 
 def configure_logging(
     loguru_filter: Callable[[Dict[str, Any]], bool] = _loguru_skiplog_filter,
 ) -> None:
-    """Configure a default ``loguru`` sink with a convenient format and filter."""
+    """Configure a default loguru sink with a structured format and optional filter.
+
+    Sets up a single stderr sink with timestamp, level, module, class name,
+    function, and line number.  Defaults ``LOGURU_LEVEL`` to ``DEBUG`` if the
+    environment variable is not already set.
+
+    Args:
+        loguru_filter: A callable that receives a loguru record dict and
+            returns ``True`` to keep the record or ``False`` to suppress it.
+            Defaults to :func:`_loguru_skiplog_filter`.
+    """
     os.environ["LOGURU_LEVEL"] = os.getenv("LOGURU_LEVEL", "DEBUG")
     glogger.remove()
     logger_fmt: str = (

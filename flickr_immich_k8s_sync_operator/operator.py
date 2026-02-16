@@ -36,6 +36,12 @@ def build_manifest(job_dict: dict) -> dict:  # type: ignore[type-arg]
     controller labels on the pod template are removed.
 
     The *job_dict* is **not** mutated.
+
+    Args:
+        job_dict: A serialised Kubernetes Job dictionary.
+
+    Returns:
+        A minimal Job manifest dict suitable for ``create_namespaced_job``.
     """
     raw = copy.deepcopy(job_dict)
 
@@ -61,9 +67,21 @@ def build_manifest(job_dict: dict) -> dict:  # type: ignore[type-arg]
 
 
 class JobRestartOperator:
-    """Watches a set of Kubernetes Jobs and restarts failed ones after a delay."""
+    """Watches a set of Kubernetes Jobs and restarts failed ones after a delay.
+
+    Connects to the in-cluster Kubernetes API on initialisation and
+    continuously polls the configured Jobs.  Failed Jobs are deleted and
+    recreated from a cached manifest once the configured restart delay has
+    elapsed (or immediately when an OOMKill is detected and
+    ``skip_delay_on_oom`` is enabled).
+    """
 
     def __init__(self, cfg: OperatorConfig) -> None:
+        """Initialise Kubernetes API clients and bind a structured logger.
+
+        Args:
+            cfg: Operator configuration (namespace, job names, timings).
+        """
         config.load_incluster_config()
         self._batch_v1 = client.BatchV1Api()
         self._core_v1 = client.CoreV1Api()
@@ -73,7 +91,15 @@ class JobRestartOperator:
         self._log = glogger.bind(classname=self.__class__.__name__)
 
     def run(self, shutdown_event: threading.Event) -> None:
-        """Main operator loop — runs until *shutdown_event* is set."""
+        """Run the main operator loop until *shutdown_event* is set.
+
+        Iterates over all configured Job names each cycle, sleeping for
+        ``check_interval`` seconds between cycles.
+
+        Args:
+            shutdown_event: Threading event that, when set, causes the loop
+                to exit gracefully.
+        """
         self._log.info(
             "Operator started — watching {} job(s) in namespace '{}'",
             len(self._cfg.job_names),
@@ -89,7 +115,15 @@ class JobRestartOperator:
                 shutdown_event.wait(timeout=self._cfg.check_interval)
 
     def _check_job(self, job_name: str, shutdown_event: threading.Event) -> None:
-        """Read a single Job and dispatch to the appropriate handler."""
+        """Read a single Job and dispatch to the appropriate handler.
+
+        Caches the cleaned manifest on every successful read so that
+        ``_restart_job`` can recreate it later.
+
+        Args:
+            job_name: Name of the Kubernetes Job to inspect.
+            shutdown_event: Threading event checked for early exit.
+        """
         self._log.opt(raw=True).info("\n")
         self._log.info("Checking {}", job_name)
         try:
@@ -120,7 +154,17 @@ class JobRestartOperator:
         failure_time: datetime,
         shutdown_event: threading.Event,
     ) -> None:
-        """Log pod details and restart the Job if the restart delay has elapsed."""
+        """Log pod details and restart the Job if the restart delay has elapsed.
+
+        When ``skip_delay_on_oom`` is enabled and the failure reason includes
+        ``OOMKilled``, the Job is restarted immediately regardless of the
+        configured delay.
+
+        Args:
+            job_name: Name of the failed Kubernetes Job.
+            failure_time: UTC timestamp of the last failure transition.
+            shutdown_event: Threading event checked for early exit.
+        """
         elapsed = (datetime.now(timezone.utc) - failure_time).total_seconds()
 
         reasons = self._get_pod_failure_reasons(job_name)
@@ -150,7 +194,17 @@ class JobRestartOperator:
             )
 
     def _get_pod_failure_reasons(self, job_name: str) -> set[str]:
-        """List pods for *job_name*, log exit codes + tail logs, and return termination reasons."""
+        """Collect termination reasons from all Pods belonging to a Job.
+
+        For each Pod, logs the exit code, termination reason, and the last
+        two lines of container output.
+
+        Args:
+            job_name: Name of the Kubernetes Job whose Pods are inspected.
+
+        Returns:
+            A set of termination reason strings (e.g. ``{"OOMKilled", "Error"}``).
+        """
         reasons: set[str] = set()
         try:
             pods = self._core_v1.list_namespaced_pod(
@@ -188,7 +242,17 @@ class JobRestartOperator:
         return reasons
 
     def _restart_job(self, job_name: str, shutdown_event: threading.Event) -> None:
-        """Delete and recreate a Job from the cached manifest."""
+        """Delete and recreate a Job from the cached manifest.
+
+        Deletes the Job with foreground propagation policy, waits 15 seconds
+        for Kubernetes to clean up resources, then creates a new Job from the
+        previously cached manifest.
+
+        Args:
+            job_name: Name of the Kubernetes Job to restart.
+            shutdown_event: Threading event; if set during the cleanup wait
+                the recreation is skipped for a clean shutdown.
+        """
         self._batch_v1.delete_namespaced_job(
             job_name,
             self._cfg.namespace,

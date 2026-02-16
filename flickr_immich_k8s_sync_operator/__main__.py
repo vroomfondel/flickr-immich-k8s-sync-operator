@@ -1,3 +1,5 @@
+"""CLI entry point — signal handling, startup banner, and main loop."""
+
 import signal
 import sys
 import threading
@@ -17,12 +19,24 @@ shutdown_event = threading.Event()
 
 
 def _signal_handler(signum: int, frame: object) -> None:
+    """Handle SIGTERM/SIGINT by setting the module-level shutdown event.
+
+    Args:
+        signum: Signal number received from the OS.
+        frame: Current stack frame (unused).
+    """
     signame = signal.Signals(signum).name
     glogger.info(f"Received {signame} — shutting down...")
     shutdown_event.set()
 
 
 def main() -> None:
+    """Run the operator.
+
+    Registers signal handlers, prints a startup banner with version and
+    configuration, initialises the Kubernetes client, and enters the
+    operator's main loop.
+    """
     signal.signal(signal.SIGTERM, _signal_handler)
     signal.signal(signal.SIGINT, _signal_handler)
 

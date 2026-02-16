@@ -21,26 +21,22 @@ class OperatorConfig:
 
     @classmethod
     def from_env(cls) -> OperatorConfig:
-        """Build an :class:`OperatorConfig` from environment variables.
+        """Build an ``OperatorConfig`` from environment variables.
 
-        Environment variables
-        ---------------------
-        NAMESPACE : str, optional
-            Kubernetes namespace to watch (default ``"flickr-downloader"``).
-        JOB_NAMES : str, **required**
-            Comma-separated list of Job names to monitor.
-        CHECK_INTERVAL : str, optional
-            Seconds between check cycles (default ``60``).
-        RESTART_DELAY : str, optional
-            Seconds after failure before a Job is restarted (default ``3600``).
-        SKIP_DELAY_ON_OOM : str, optional
-            If ``"true"`` (case-insensitive), skip the restart delay when the
-            failure reason is ``OOMKilled`` (default ``"false"``).
+        Reads the following environment variables:
 
-        Raises
-        ------
-        ValueError
-            If ``JOB_NAMES`` is missing or contains no non-empty entries.
+        - ``NAMESPACE`` — Kubernetes namespace to watch (default ``"flickr-downloader"``).
+        - ``JOB_NAMES`` — Comma-separated list of Job names to monitor (**required**).
+        - ``CHECK_INTERVAL`` — Seconds between check cycles (default ``60``).
+        - ``RESTART_DELAY`` — Seconds after failure before a Job is restarted (default ``3600``).
+        - ``SKIP_DELAY_ON_OOM`` — If ``"true"`` (case-insensitive), skip the restart
+          delay when the failure reason is ``OOMKilled`` (default ``"false"``).
+
+        Returns:
+            A fully populated ``OperatorConfig`` instance.
+
+        Raises:
+            ValueError: If ``JOB_NAMES`` is missing or contains no non-empty entries.
         """
         raw_job_names = os.environ.get("JOB_NAMES", "")
         job_names = [name.strip() for name in raw_job_names.split(",") if name.strip()]
