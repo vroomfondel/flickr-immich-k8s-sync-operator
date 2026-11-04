@@ -1,4 +1,4 @@
-.PHONY: tests help install venv lint isort tcheck build commit-checks prepare pypibuild pypipush docker update-all-dockerhub-readmes
+.PHONY: tests help install venv lint isort tcheck build commit-checks prepare distcheck pypibuild pypipush docker update-all-dockerhub-readmes
 SHELL := /usr/bin/bash
 .ONESHELL:
 
@@ -78,10 +78,18 @@ dist/flickr_immich_k8s_sync_operator-$(VERSION).tar.gz dist/flickr_immich_k8s_sy
 	@touch dist/.touchfile
 
 
-pypibuild: venv dist/flickr_immich_k8s_sync_operator-$(VERSION).tar.gz dist/flickr_immich_k8s_sync_operator-$(VERSION)-py3-none-any.whl
+# Refuses to let a build artifact leave the machine if it carries a git-crypt
+# protected path (those are PLAINTEXT in the working tree) or any file outside
+# the allowlist that pyproject.toml declares. Gates `pypibuild` and `pypipush`.
+distcheck: venv dist/flickr_immich_k8s_sync_operator-$(VERSION).tar.gz dist/flickr_immich_k8s_sync_operator-$(VERSION)-py3-none-any.whl
+	@$(venv_activated)
+	python scripts/check_dist_secrets.py
+
+pypibuild: distcheck
 
 dist/.touchfile_push: dist/flickr_immich_k8s_sync_operator-$(VERSION).tar.gz dist/flickr_immich_k8s_sync_operator-$(VERSION)-py3-none-any.whl
 	@$(venv_activated)
+	$(MAKE) distcheck
 	hatch publish -r main
 	@touch dist/.touchfile_push
 
