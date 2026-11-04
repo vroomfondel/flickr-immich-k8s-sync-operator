@@ -211,4 +211,4 @@ python -m flickr_immich_k8s_sync_operator
 
 ## License
 
-[GNU Lesser General Public License v3](LICENSE.md)
+[GNU Lesser General Public License v3](https://github.com/vroomfondel/flickr-immich-k8s-sync-operator/blob/main/LICENSE.md)

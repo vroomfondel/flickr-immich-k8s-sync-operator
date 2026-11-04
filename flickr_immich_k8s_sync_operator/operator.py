@@ -6,6 +6,7 @@ import copy
 import textwrap
 import threading
 from datetime import datetime, timezone
+from typing import cast
 
 from kubernetes import client, config
 from loguru import logger as glogger
@@ -130,13 +131,17 @@ class JobRestartOperator:
             job = self._batch_v1.read_namespaced_job(job_name, self._cfg.namespace)
             self._cached_manifests[job_name] = build_manifest(self._api_client.sanitize_for_serialization(job))
 
-            conditions = job.status.conditions or []
+            status = job.status
+            conditions = (status.conditions if status else None) or []
             failed = any(c.type == "Failed" and c.status == "True" for c in conditions)
 
-            if job.status.active:
+            if status and status.active:
                 self._log.info("\t{} is running.", job_name)
             elif failed:
                 fail_condition = next(c for c in conditions if c.type == "Failed" and c.status == "True")
+                if fail_condition.last_transition_time is None:
+                    self._log.warning("\t{} failed but has no lastTransitionTime. Skipping.", job_name)
+                    return
                 self._handle_failed_job(job_name, fail_condition.last_transition_time, shutdown_event)
             else:
                 self._log.info("\t{} succeeded or still pending. No action needed.", job_name)
@@ -212,10 +217,12 @@ class JobRestartOperator:
                 label_selector=f"job-name={job_name}",
             )
             for pod in pods.items:
+                if pod.metadata is None or pod.metadata.name is None:
+                    continue
                 pod_name: str = pod.metadata.name
                 exit_code = None
                 reason = None
-                for cs in pod.status.container_statuses or []:
+                for cs in (pod.status.container_statuses if pod.status else None) or []:
                     if cs.state and cs.state.terminated:
                         exit_code = cs.state.terminated.exit_code
                         reason = cs.state.terminated.reason
@@ -263,6 +270,7 @@ class JobRestartOperator:
             return
         self._batch_v1.create_namespaced_job(
             self._cfg.namespace,
-            self._cached_manifests[job_name],
+            # The client serialises plain dicts as-is; V1Job is only the declared type.
+            cast(client.V1Job, self._cached_manifests[job_name]),
         )
         self._log.info("\t{} restarted successfully.", job_name)
